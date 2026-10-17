@@ -1,6 +1,3 @@
-
-using namespace std;
-
 class UserPreferences {
 private:
     string selectedGenre;
