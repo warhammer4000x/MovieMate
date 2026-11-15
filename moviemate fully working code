@@ -1,0 +1,366 @@
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <iomanip>
+using namespace std;
+
+const int MAX_MOVIES = 600;
+
+// ---------------- MODULE 1: MOVIE DATABASE ----------------
+
+class Movie
+{
+private:
+    string name;
+    string genre;
+    float rating;
+    int releaseYear;
+
+public:
+    Movie()
+    {
+        name = "";
+        genre = "";
+        rating = 0.0;
+        releaseYear = 0;
+    }
+
+    Movie(string n, string g, float r, int y)
+    {
+        name = n;
+        genre = g;
+        rating = r;
+        releaseYear = y;
+    }
+
+    string getName() const { return name; }
+    string getGenre() const { return genre; }
+    float getRating() const { return rating; }
+    int getReleaseYear() const { return releaseYear; }
+};
+
+// Reads CSV fields, including quoted fields containing commas.
+int parseCSVLine(const string &line, string fields[], int maxFields)
+{
+    int fieldCount = 0;
+    bool insideQuotes = false;
+    string current = "";
+
+    for (int i = 0; i < (int)line.length(); i++)
+    {
+        char ch = line[i];
+
+        if (ch == '"')
+        {
+            if (insideQuotes && i + 1 < (int)line.length()
+                && line[i + 1] == '"')
+            {
+                current += '"';
+                i++;
+            }
+            else
+            {
+                insideQuotes = !insideQuotes;
+            }
+        }
+        else if (ch == ',' && !insideQuotes)
+        {
+            if (fieldCount < maxFields)
+                fields[fieldCount] = current;
+
+            fieldCount++;
+            current = "";
+        }
+        else
+        {
+            current += ch;
+        }
+    }
+
+    if (fieldCount < maxFields)
+        fields[fieldCount] = current;
+
+    return fieldCount + 1;
+}
+
+// Loads movie records from movies.csv.
+int loadMovies(Movie movies[])
+{
+    ifstream file("movies.csv");
+
+    if (!file.is_open())
+    {
+        cout << "\nError: Could not open movies.csv!\n";
+        cout << "Keep movies.csv in the same folder as main.cpp.\n";
+        return -1;
+    }
+
+    string line;
+    getline(file, line); // Skip CSV header
+
+    int count = 0;
+
+    while (getline(file, line) && count < MAX_MOVIES)
+    {
+        if (line.empty())
+            continue;
+
+        string fields[4];
+        int fieldCount = parseCSVLine(line, fields, 4);
+
+        if (fieldCount != 4)
+            continue;
+
+        try
+        {
+            float rating = stof(fields[2]);
+            int year = stoi(fields[3]);
+
+            movies[count] = Movie(
+                fields[0], fields[1], rating, year
+            );
+
+            count++;
+        }
+        catch (...)
+        {
+           
+        }
+    }
+
+    file.close();
+    return count;
+}
+
+// ---------------- MODULE 2: USER PREFERENCES ----------------
+
+string chooseGenre()
+{
+    int choice;
+
+    cout << "\n========== SELECT MOVIE GENRE ==========\n";
+    cout << "1. Action\n";
+    cout << "2. Comedy\n";
+    cout << "3. Horror\n";
+    cout << "4. Romance\n";
+    cout << "5. Sci-Fi\n";
+    cout << "6. Drama\n";
+    cout << "7. Animation\n";
+
+    while (true)
+    {
+        cout << "\nEnter your choice (1-7): ";
+
+        if (cin >> choice && choice >= 1 && choice <= 7)
+            break;
+
+        cout << "Invalid choice. Enter a number from 1 to 7.\n";
+        cin.clear();
+        cin.ignore(10000, '\n');
+    }
+
+    switch (choice)
+    {
+        case 1: return "Action";
+        case 2: return "Comedy";
+        case 3: return "Horror";
+        case 4: return "Romance";
+        case 5: return "Sci-Fi";
+        case 6: return "Drama";
+        case 7: return "Animation";
+    }
+
+    return "";
+}
+
+float getMinimumRating()
+{
+    float rating;
+
+    while (true)
+    {
+        cout << "Enter minimum IMDb rating (0-10): ";
+
+        if (cin >> rating && rating >= 0.0 && rating <= 10.0)
+            return rating;
+
+        cout << "Invalid rating. Enter a value between 0 and 10.\n";
+        cin.clear();
+        cin.ignore(10000, '\n');
+    }
+}
+
+// ---------------- MODULE 3: RECOMMENDATION ENGINE ----------------
+
+int filterMovies(
+    Movie movies[],
+    int movieCount,
+    Movie recommendations[],
+    const string &selectedGenre,
+    float minimumRating)
+{
+    int resultCount = 0;
+
+    for (int i = 0; i < movieCount; i++)
+    {
+        if (movies[i].getGenre() == selectedGenre &&
+            movies[i].getRating() >= minimumRating)
+        {
+            recommendations[resultCount] = movies[i];
+            resultCount++;
+        }
+    }
+
+    return resultCount;
+}
+
+// ---------------- MODULE 4: QUICK SORT AND DISPLAY ----------------
+
+int partitionMovies(Movie movies[], int low, int high)
+{
+    float pivot = movies[high].getRating();
+    int i = low - 1;
+
+    for (int j = low; j < high; j++)
+    {
+        if (movies[j].getRating() >= pivot)
+        {
+            i++;
+
+            Movie temp = movies[i];
+            movies[i] = movies[j];
+            movies[j] = temp;
+        }
+    }
+
+    Movie temp = movies[i + 1];
+    movies[i + 1] = movies[high];
+    movies[high] = temp;
+
+    return i + 1;
+}
+
+void quickSort(Movie movies[], int low, int high)
+{
+    if (low < high)
+    {
+        int pivotIndex = partitionMovies(movies, low, high);
+
+        quickSort(movies, low, pivotIndex - 1);
+        quickSort(movies, pivotIndex + 1, high);
+    }
+}
+
+void displayRecommendations(Movie movies[], int start, int end)
+{
+    cout << "\n========== RECOMMENDED MOVIES ==========\n";
+
+    cout << left << setw(5) << "No."
+         << setw(55) << "Movie Name"
+         << setw(12) << "Rating"
+         << "Year\n";
+
+    cout << string(82, '-') << "\n";
+
+    for (int i = start; i < end; i++)
+    {
+        cout << left << setw(5) << i + 1
+             << setw(55) << movies[i].getName()
+             << setw(12) << fixed << setprecision(1)
+             << movies[i].getRating()
+             << movies[i].getReleaseYear() << "\n";
+    }
+}
+
+// ---------------- MAIN FUNCTION ----------------
+
+int main()
+{
+    Movie movies[MAX_MOVIES];
+    Movie recommendations[MAX_MOVIES];
+
+    cout << "========================================\n";
+    cout << "       MOVIE RECOMMENDATION SYSTEM      \n";
+    cout << "========================================\n";
+
+    int movieCount = loadMovies(movies);
+
+    if (movieCount <= 0)
+    {
+        if (movieCount == 0)
+            cout << "\nNo movie records found in movies.csv.\n";
+
+        return 1;
+    }
+
+    cout << "\nSuccessfully loaded "
+         << movieCount << " movies from CSV.\n";
+
+    char again;
+
+    do
+    {
+        string selectedGenre = chooseGenre();
+        float minimumRating = getMinimumRating();
+
+        int recommendationCount = filterMovies(
+            movies,
+            movieCount,
+            recommendations,
+            selectedGenre,
+            minimumRating
+        );
+
+        quickSort(
+            recommendations,
+            0,
+            recommendationCount - 1
+        );
+
+        if (recommendationCount == 0)
+        {
+            cout << "\nSorry! No movies match your preferences.\n";
+        }
+        else
+        {
+            int start = 0;
+
+            while (start < recommendationCount)
+            {
+                int end = start + 5;
+
+                if (end > recommendationCount)
+                    end = recommendationCount;
+
+                displayRecommendations(
+                    recommendations, start, end
+                );
+
+                start = end;
+
+                if (start < recommendationCount)
+                {
+                    cout << "\nWould you like more suggestions? (Y/N): ";
+                    cin >> again;
+
+                    if (again != 'Y' && again != 'y')
+                        break;
+                }
+                else
+                {
+                    cout << "\nYou have seen all available recommendations!\n";
+                }
+            }
+        }
+
+        cout << "\nWould you like recommendations from another genre? (Y/N): ";
+        cin >> again;
+
+    } while (again == 'Y' || again == 'y');
+
+    cout << "\nThank you for using the Movie Recommendation System!\n";
+
+    return 0;
+}
