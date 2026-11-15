@@ -1,0 +1,22 @@
+
+int filterMovies(
+    Movie movies[],
+    int movieCount,
+    Movie recommendations[],
+    const string &selectedGenre,
+    float minimumRating)
+{
+    int resultCount = 0;
+
+    for (int i = 0; i < movieCount; i++)
+    {
+        if (movies[i].getGenre() == selectedGenre &&
+            movies[i].getRating() >= minimumRating)
+        {
+            recommendations[resultCount] = movies[i];
+            resultCount++;
+        }
+    }
+
+    return resultCount;
+}
