@@ -1,0 +1,123 @@
+
+class Movie
+{
+private:
+    string name;
+    string genre;
+    float rating;
+    int releaseYear;
+
+public:
+    Movie()
+    {
+        name = "";
+        genre = "";
+        rating = 0.0;
+        releaseYear = 0;
+    }
+
+    Movie(string n, string g, float r, int y)
+    {
+        name = n;
+        genre = g;
+        rating = r;
+        releaseYear = y;
+    }
+
+    string getName() const { return name; }
+    string getGenre() const { return genre; }
+    float getRating() const { return rating; }
+    int getReleaseYear() const { return releaseYear; }
+};
+
+// Reads CSV fields, including quoted fields containing commas.
+int parseCSVLine(const string &line, string fields[], int maxFields)
+{
+    int fieldCount = 0;
+    bool insideQuotes = false;
+    string current = "";
+
+    for (int i = 0; i < (int)line.length(); i++)
+    {
+        char ch = line[i];
+
+        if (ch == '"')
+        {
+            if (insideQuotes && i + 1 < (int)line.length()
+                && line[i + 1] == '"')
+            {
+                current += '"';
+                i++;
+            }
+            else
+            {
+                insideQuotes = !insideQuotes;
+            }
+        }
+        else if (ch == ',' && !insideQuotes)
+        {
+            if (fieldCount < maxFields)
+                fields[fieldCount] = current;
+
+            fieldCount++;
+            current = "";
+        }
+        else
+        {
+            current += ch;
+        }
+    }
+
+    if (fieldCount < maxFields)
+        fields[fieldCount] = current;
+
+    return fieldCount + 1;
+}
+
+// Loads movie records from movies.csv.
+int loadMovies(Movie movies[])
+{
+    ifstream file("movies.csv");
+
+    if (!file.is_open())
+    {
+        cout << "\nError: Could not open movies.csv!\n";
+        cout << "Keep movies.csv in the same folder as main.cpp.\n";
+        return -1;
+    }
+
+    string line;
+    getline(file, line); // Skip CSV header
+
+    int count = 0;
+
+    while (getline(file, line) && count < MAX_MOVIES)
+    {
+        if (line.empty())
+            continue;
+
+        string fields[4];
+        int fieldCount = parseCSVLine(line, fields, 4);
+
+        if (fieldCount != 4)
+            continue;
+
+        try
+        {
+            float rating = stof(fields[2]);
+            int year = stoi(fields[3]);
+
+            movies[count] = Movie(
+                fields[0], fields[1], rating, year
+            );
+
+            count++;
+        }
+        catch (...)
+        {
+        }
+    }
+
+    file.close();
+    return count;
+}
