@@ -1,0 +1,55 @@
+int partitionMovies(Movie movies[], int low, int high)
+{
+    float pivot = movies[high].getRating();
+    int i = low - 1;
+
+    for (int j = low; j < high; j++)
+    {
+        if (movies[j].getRating() >= pivot)
+        {
+            i++;
+
+            Movie temp = movies[i];
+            movies[i] = movies[j];
+            movies[j] = temp;
+        }
+    }
+
+    Movie temp = movies[i + 1];
+    movies[i + 1] = movies[high];
+    movies[high] = temp;
+
+    return i + 1;
+}
+
+void quickSort(Movie movies[], int low, int high)
+{
+    if (low < high)
+    {
+        int pivotIndex = partitionMovies(movies, low, high);
+
+        quickSort(movies, low, pivotIndex - 1);
+        quickSort(movies, pivotIndex + 1, high);
+    }
+}
+
+void displayRecommendations(Movie movies[], int start, int end)
+{
+    cout << "\n========== RECOMMENDED MOVIES ==========\n";
+
+    cout << left << setw(5) << "No."
+         << setw(55) << "Movie Name"
+         << setw(12) << "Rating"
+         << "Year\n";
+
+    cout << string(82, '-') << "\n";
+
+    for (int i = start; i < end; i++)
+    {
+        cout << left << setw(5) << i + 1
+             << setw(55) << movies[i].getName()
+             << setw(12) << fixed << setprecision(1)
+             << movies[i].getRating()
+             << movies[i].getReleaseYear() << "\n";
+    }
+}
