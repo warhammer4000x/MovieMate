@@ -1,0 +1,56 @@
+
+string chooseGenre()
+{
+    int choice;
+
+    cout << "\n========== SELECT MOVIE GENRE ==========\n";
+    cout << "1. Action\n";
+    cout << "2. Comedy\n";
+    cout << "3. Horror\n";
+    cout << "4. Romance\n";
+    cout << "5. Sci-Fi\n";
+    cout << "6. Drama\n";
+    cout << "7. Animation\n";
+
+    while (true)
+    {
+        cout << "\nEnter your choice (1-7): ";
+
+        if (cin >> choice && choice >= 1 && choice <= 7)
+            break;
+
+        cout << "Invalid choice. Enter a number from 1 to 7.\n";
+        cin.clear();
+        cin.ignore(10000, '\n');
+    }
+
+    switch (choice)
+    {
+        case 1: return "Action";
+        case 2: return "Comedy";
+        case 3: return "Horror";
+        case 4: return "Romance";
+        case 5: return "Sci-Fi";
+        case 6: return "Drama";
+        case 7: return "Animation";
+    }
+
+    return "";
+}
+
+float getMinimumRating()
+{
+    float rating;
+
+    while (true)
+    {
+        cout << "Enter minimum IMDb rating (0-10): ";
+
+        if (cin >> rating && rating >= 0.0 && rating <= 10.0)
+            return rating;
+
+        cout << "Invalid rating. Enter a value between 0 and 10.\n";
+        cin.clear();
+        cin.ignore(10000, '\n');
+    }
+}
