@@ -1,0 +1,89 @@
+
+int main()
+{
+    Movie movies[MAX_MOVIES];
+    Movie recommendations[MAX_MOVIES];
+
+    cout << "========================================\n";
+    cout << "       MOVIE RECOMMENDATION SYSTEM      \n";
+    cout << "========================================\n";
+
+    int movieCount = loadMovies(movies);
+
+    if (movieCount <= 0)
+    {
+        if (movieCount == 0)
+            cout << "\nNo movie records found in movies.csv.\n";
+
+        return 1;
+    }
+
+    cout << "\nSuccessfully loaded "
+         << movieCount << " movies from CSV.\n";
+
+    char again;
+
+    do
+    {
+        string selectedGenre = chooseGenre();
+        float minimumRating = getMinimumRating();
+
+        int recommendationCount = filterMovies(
+            movies,
+            movieCount,
+            recommendations,
+            selectedGenre,
+            minimumRating
+        );
+
+        quickSort(
+            recommendations,
+            0,
+            recommendationCount - 1
+        );
+
+        if (recommendationCount == 0)
+        {
+            cout << "\nSorry! No movies match your preferences.\n";
+        }
+        else
+        {
+            int start = 0;
+
+            while (start < recommendationCount)
+            {
+                int end = start + 5;
+
+                if (end > recommendationCount)
+                    end = recommendationCount;
+
+                displayRecommendations(
+                    recommendations, start, end
+                );
+
+                start = end;
+
+                if (start < recommendationCount)
+                {
+                    cout << "\nWould you like more suggestions? (Y/N): ";
+                    cin >> again;
+
+                    if (again != 'Y' && again != 'y')
+                        break;
+                }
+                else
+                {
+                    cout << "\nYou have seen all available recommendations!\n";
+                }
+            }
+        }
+
+        cout << "\nWould you like recommendations from another genre? (Y/N): ";
+        cin >> again;
+
+    } while (again == 'Y' || again == 'y');
+
+    cout << "\nThank you for using the Movie Recommendation System!\n";
+
+    return 0;
+}
