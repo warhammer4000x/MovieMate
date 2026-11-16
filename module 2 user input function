@@ -1,3 +1,4 @@
+// ---------------- MODULE 2: USER PREFERENCES ----------------
 
 string chooseGenre()
 {
@@ -17,7 +18,9 @@ string chooseGenre()
         cout << "\nEnter your choice (1-7): ";
 
         if (cin >> choice && choice >= 1 && choice <= 7)
+        {
             break;
+        }
 
         cout << "Invalid choice. Enter a number from 1 to 7.\n";
         cin.clear();
@@ -47,7 +50,9 @@ float getMinimumRating()
         cout << "Enter minimum IMDb rating (0-10): ";
 
         if (cin >> rating && rating >= 0.0 && rating <= 10.0)
+        {
             return rating;
+        }
 
         cout << "Invalid rating. Enter a value between 0 and 10.\n";
         cin.clear();
