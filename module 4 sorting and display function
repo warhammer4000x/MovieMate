@@ -1,3 +1,5 @@
+// ---------------- MODULE 4: QUICK SORT AND DISPLAY ----------------
+
 int partitionMovies(Movie movies[], int low, int high)
 {
     float pivot = movies[high].getRating();
