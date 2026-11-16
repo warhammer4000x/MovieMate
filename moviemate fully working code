@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -7,6 +6,7 @@
 using namespace std;
 
 const int MAX_MOVIES = 600;
+
 
 // ---------------- MODULE 1: MOVIE DATABASE ----------------
 
@@ -41,51 +41,8 @@ public:
     int getReleaseYear() const { return releaseYear; }
 };
 
-// Reads CSV fields, including quoted fields containing commas.
-int parseCSVLine(const string &line, string fields[], int maxFields)
-{
-    int fieldCount = 0;
-    bool insideQuotes = false;
-    string current = "";
 
-    for (int i = 0; i < (int)line.length(); i++)
-    {
-        char ch = line[i];
 
-        if (ch == '"')
-        {
-            if (insideQuotes && i + 1 < (int)line.length()
-                && line[i + 1] == '"')
-            {
-                current += '"';
-                i++;
-            }
-            else
-            {
-                insideQuotes = !insideQuotes;
-            }
-        }
-        else if (ch == ',' && !insideQuotes)
-        {
-            if (fieldCount < maxFields)
-                fields[fieldCount] = current;
-
-            fieldCount++;
-            current = "";
-        }
-        else
-        {
-            current += ch;
-        }
-    }
-
-    if (fieldCount < maxFields)
-        fields[fieldCount] = current;
-
-    return fieldCount + 1;
-}
-
-// Loads movie records from movies.csv.
 int loadMovies(Movie movies[])
 {
     ifstream file("movies.csv");
@@ -98,41 +55,44 @@ int loadMovies(Movie movies[])
     }
 
     string line;
-    getline(file, line); // Skip CSV header
+    getline(file, line);   
 
     int count = 0;
 
     while (getline(file, line) && count < MAX_MOVIES)
     {
         if (line.empty())
-            continue;
-
-        string fields[4];
-        int fieldCount = parseCSVLine(line, fields, 4);
-
-        if (fieldCount != 4)
-            continue;
-
-        try
         {
-            float rating = stof(fields[2]);
-            int year = stoi(fields[3]);
-
-            movies[count] = Movie(
-                fields[0], fields[1], rating, year
-            );
-
-            count++;
+            continue;
         }
-        catch (...)
+
+        stringstream ss(line);
+
+        string name;
+        string genre;
+        string rating;
+        string year;
+
+        getline(ss, name, ',');
+        getline(ss, genre, ',');
+        getline(ss, rating, ',');
+        getline(ss, year, ',');
+
+        if (year.empty())
         {
-           
+            continue;   
         }
+
+        movies[count] = Movie(name, genre, stof(rating), stoi(year));
+
+        count++;
     }
 
     file.close();
+
     return count;
 }
+
 
 // ---------------- MODULE 2: USER PREFERENCES ----------------
 
@@ -154,7 +114,9 @@ string chooseGenre()
         cout << "\nEnter your choice (1-7): ";
 
         if (cin >> choice && choice >= 1 && choice <= 7)
+        {
             break;
+        }
 
         cout << "Invalid choice. Enter a number from 1 to 7.\n";
         cin.clear();
@@ -184,13 +146,16 @@ float getMinimumRating()
         cout << "Enter minimum IMDb rating (0-10): ";
 
         if (cin >> rating && rating >= 0.0 && rating <= 10.0)
+        {
             return rating;
+        }
 
         cout << "Invalid rating. Enter a value between 0 and 10.\n";
         cin.clear();
         cin.ignore(10000, '\n');
     }
 }
+
 
 // ---------------- MODULE 3: RECOMMENDATION ENGINE ----------------
 
@@ -215,6 +180,7 @@ int filterMovies(
 
     return resultCount;
 }
+
 
 // ---------------- MODULE 4: QUICK SORT AND DISPLAY ----------------
 
@@ -274,6 +240,7 @@ void displayRecommendations(Movie movies[], int start, int end)
     }
 }
 
+
 // ---------------- MAIN FUNCTION ----------------
 
 int main()
@@ -290,7 +257,9 @@ int main()
     if (movieCount <= 0)
     {
         if (movieCount == 0)
+        {
             cout << "\nNo movie records found in movies.csv.\n";
+        }
 
         return 1;
     }
@@ -332,7 +301,9 @@ int main()
                 int end = start + 5;
 
                 if (end > recommendationCount)
+                {
                     end = recommendationCount;
+                }
 
                 displayRecommendations(
                     recommendations, start, end
@@ -346,7 +317,9 @@ int main()
                     cin >> again;
 
                     if (again != 'Y' && again != 'y')
+                    {
                         break;
+                    }
                 }
                 else
                 {
