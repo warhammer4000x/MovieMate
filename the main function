@@ -1,4 +1,6 @@
 
+// ---------------- MAIN FUNCTION ----------------
+
 int main()
 {
     Movie movies[MAX_MOVIES];
@@ -13,7 +15,9 @@ int main()
     if (movieCount <= 0)
     {
         if (movieCount == 0)
+        {
             cout << "\nNo movie records found in movies.csv.\n";
+        }
 
         return 1;
     }
@@ -55,7 +59,9 @@ int main()
                 int end = start + 5;
 
                 if (end > recommendationCount)
+                {
                     end = recommendationCount;
+                }
 
                 displayRecommendations(
                     recommendations, start, end
@@ -69,7 +75,9 @@ int main()
                     cin >> again;
 
                     if (again != 'Y' && again != 'y')
+                    {
                         break;
+                    }
                 }
                 else
                 {
